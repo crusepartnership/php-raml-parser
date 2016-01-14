@@ -15,6 +15,7 @@ use Raml\SecurityScheme\SecuritySettingsParser\DefaultSecuritySettingsParser;
 use Raml\SecurityScheme\SecuritySettingsParser\OAuth1SecuritySettingsParser;
 use Raml\SecurityScheme\SecuritySettingsParser\OAuth2SecuritySettingsParser;
 use Raml\SecurityScheme\SecuritySettingsParserInterface;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -244,6 +245,8 @@ class Parser
 
         $ramlData = $this->parseResourceTypes($ramlData);
 
+        $ramlData = $this->parseAnnotations($ramlData);
+
         if ($this->configuration->isSchemaParsingEnabled()) {
             if (isset($ramlData['schemas'])) {
                 $schemas = [];
@@ -344,8 +347,7 @@ class Parser
     /**
      * Parse the security settings data into an array
      *
-     * @param array $array
-     *
+     * @param $schemesArray
      * @return array
      */
     private function parseSecuritySettings($schemesArray)
@@ -396,12 +398,7 @@ class Parser
     private function parseResourceTypes($ramlData)
     {
         if (isset($ramlData['resourceTypes'])) {
-            $keyedTraits = [];
-            foreach ($ramlData['resourceTypes'] as $trait) {
-                foreach ($trait as $k => $t) {
-                    $keyedTraits[$k] = $t;
-                }
-            }
+            $keyedTraits = $this->parseCollection($ramlData['resourceTypes']);
 
             foreach ($ramlData as $key => $value) {
                 if (strpos($key, '/') === 0) {
@@ -414,6 +411,40 @@ class Parser
         return $ramlData;
     }
 
+    private function parseAnnotations($ramlData)
+    {
+        if (isset($ramlData['annotationTypes'])) {
+            $keyedAnnotations = $this->parseCollection($ramlData['annotationTypes']);
+            $ramlData = $this->replaceAnnotations($ramlData, $keyedAnnotations);
+        }
+
+        return $ramlData;
+
+    }
+
+
+    private function replaceAnnotations($data, $allowedAnnotations)
+    {
+        $pattern = '/\(.*\)/';
+        foreach ($data as $key => $value) {
+            if (preg_match($pattern, $key)) {
+                $annotationKey = trim($key, '()');
+                if (!isset($allowedAnnotations[$annotationKey])) {
+                    throw new RamlParserExceptions(sprintf('Unspecified annotation set %s', $annotationKey));
+                }
+                if (!isset($data['annotations'])) {
+                    $data['annotations'] = [];
+                }
+                $data['annotations'][$annotationKey] = $value;
+                unset($data[$key]);
+            } elseif (is_array($value)) {
+                $data[$key] = $this->replaceAnnotations($value, $allowedAnnotations);
+            }
+        }
+
+        return $data;
+    }
+
     /**
      * Parse the traits
      *
@@ -424,12 +455,7 @@ class Parser
     private function parseTraits($ramlData)
     {
         if (isset($ramlData['traits'])) {
-            $keyedTraits = [];
-            foreach ($ramlData['traits'] as $trait) {
-                foreach ($trait as $k => $t) {
-                    $keyedTraits[$k] = $t;
-                }
-            }
+            $keyedTraits = $this->parseCollection($ramlData['traits']);
 
             foreach ($ramlData as $key => $value) {
                 if (strpos($key, '/') === 0) {
@@ -442,6 +468,27 @@ class Parser
         // ---
 
         return $ramlData;
+    }
+
+    /**
+     * Take a associative/numeric collection and return an associative collection
+     *
+     * @param $data
+     * @return array
+     */
+    private function parseCollection($data)
+    {
+        $collection = array();
+        if (array_keys($data) !== range(0, count($data) - 1)) {
+            $collection = $data;
+        } else {
+            foreach ($data as $item) {
+                foreach ($item as $k => $t) {
+                    $collection[$k] = $t;
+                }
+            }
+        }
+        return $collection;
     }
 
     /**
@@ -466,7 +513,7 @@ class Parser
         }
 
         if (strpos($header, '#%RAML') === 0) {
-            // @todo extract the vesion of the raml and do something with it
+            // @todo extract the version of the raml and do something with it
 
             $data = $this->includeAndParseFiles(
                 $data,

@@ -19,6 +19,8 @@ use Raml\Exception\BadParameter\InvalidProtocolException;
  */
 class ApiDefinition implements ArrayInstantiationInterface
 {
+    use AnnotationTrait;
+
     const PROTOCOL_HTTP = 'HTTP';
     const PROTOCOL_HTTPS = 'HTTPS';
 
@@ -234,6 +236,8 @@ class ApiDefinition implements ArrayInstantiationInterface
                 $apiDefinition->addDocumentation($title, $documentation);
             }
         }
+
+        $apiDefinition->applyAnnotations($data, $apiDefinition);
 
         // ---
 

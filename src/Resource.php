@@ -8,6 +8,8 @@ namespace Raml;
  */
 class Resource implements ArrayInstantiationInterface
 {
+    use AnnotationTrait;
+
     /**
      * The URI of this resource (required)
      * - Must begin with a "/"
@@ -160,6 +162,8 @@ class Resource implements ArrayInstantiationInterface
                 }
             }
         }
+
+        $resource->applyAnnotations($data, $apiDefinition);
 
         foreach ($data as $key => $value) {
             if (strpos($key, '/') === 0) {

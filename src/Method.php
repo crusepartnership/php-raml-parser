@@ -8,6 +8,8 @@ namespace Raml;
  */
 class Method implements ArrayInstantiationInterface
 {
+    use AnnotationTrait;
+
     /**
      * Valid METHODS
      * - Currently missing OPTIONS as this is unlikely to be specified in RAML
@@ -203,6 +205,8 @@ class Method implements ArrayInstantiationInterface
                 }
             }
         }
+
+        $method->applyAnnotations($data, $apiDefinition);
 
         return $method;
     }

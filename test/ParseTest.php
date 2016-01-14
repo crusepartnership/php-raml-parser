@@ -858,4 +858,18 @@ RAML;
         $this->assertSame($settingsObject->getScopes(), array('ADMINISTRATOR', 'USER'));
         $this->assertSame($settingsObject->getAuthorizationUri(), 'https://www.dropbox.com/1/oauth2/authorize');
     }
+
+    /** @test */
+    public function shouldApplyAnnotationsOnMethod()
+    {
+        $apiDefinition = $this->parser->parse(__DIR__ . '/fixture/annotations.raml');
+        $resource = $apiDefinition->getResourceByUri('/songs');
+        $method = $resource->getMethod('get');
+        $annotations =  $method->getAnnotations();
+        $this->assertArrayHasKey('permission', $annotations);
+        $annotation = $annotations['permission'];
+        $this->assertInstanceOf(Raml\Annotation::class, $annotation);
+        $this->assertSame(array('key'=>'songs.list'), $annotation->getValue());
+
+    }
 }
