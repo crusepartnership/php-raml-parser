@@ -14,7 +14,7 @@ class Annotation implements ArrayInstantiationInterface
     private $value;
 
 
-    public function __construct($name, $value, ApiDefinition $apiDefinition)
+    public function __construct($name, $value)
     {
         $this->name = $name;
         $this->value = $value;
@@ -44,9 +44,9 @@ class Annotation implements ArrayInstantiationInterface
      *
      * @return ArrayInstantiationInterface
      */
-    public static function createFromArray($key, array $data = [], ApiDefinition $apiDefinition = null)
+    public static function createFromArray($key, array $data = [])
     {
-        $annotation = new static($key, $data['value'], $apiDefinition);
+        $annotation = new static($key, $data['value']);
 
         return $annotation;
     }

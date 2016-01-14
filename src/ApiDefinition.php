@@ -237,7 +237,7 @@ class ApiDefinition implements ArrayInstantiationInterface
             }
         }
 
-        $apiDefinition->applyAnnotations($data, $apiDefinition);
+        $apiDefinition->applyAnnotations($data);
 
         // ---
 

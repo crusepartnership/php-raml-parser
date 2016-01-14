@@ -206,7 +206,7 @@ class Method implements ArrayInstantiationInterface
             }
         }
 
-        $method->applyAnnotations($data, $apiDefinition);
+        $method->applyAnnotations($data);
 
         return $method;
     }

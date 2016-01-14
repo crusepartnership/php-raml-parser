@@ -7,12 +7,12 @@ trait AnnotationTrait
     private $annotations = array();
 
 
-    public function applyAnnotations($data, ApiDefinition $apiDefinition)
+    public function applyAnnotations($data)
     {
         if (isset($data['annotations'])) {
             foreach ($data['annotations'] as $key => $value) {
                 $value = array('value' => $value);
-                $this->addAnnotation(Annotation::createFromArray($key, $value, $apiDefinition));
+                $this->addAnnotation(Annotation::createFromArray($key, $value));
             }
         }
     }

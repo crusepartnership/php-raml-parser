@@ -163,7 +163,7 @@ class Resource implements ArrayInstantiationInterface
             }
         }
 
-        $resource->applyAnnotations($data, $apiDefinition);
+        $resource->applyAnnotations($data);
 
         foreach ($data as $key => $value) {
             if (strpos($key, '/') === 0) {
