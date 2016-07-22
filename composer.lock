@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f5b7fe99fe7848d94160d013e77d971b",
-    "content-hash": "620587b668de0aed74bb3b23f225f351",
+    "hash": "7b29147762998d718a23cd0d5da59f56",
+    "content-hash": "e4e4de651a849ce8aa11adf620bda57d",
     "packages": [
         {
             "name": "justinrainbow/json-schema",
@@ -200,16 +200,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.1.2",
+            "version": "v3.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "2884c26ce4c1d61aebf423a8b912950fe7c764de"
+                "reference": "d7dfe7f9915916195ed146cf81a5ac74b5095751"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/2884c26ce4c1d61aebf423a8b912950fe7c764de",
-                "reference": "2884c26ce4c1d61aebf423a8b912950fe7c764de",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/d7dfe7f9915916195ed146cf81a5ac74b5095751",
+                "reference": "d7dfe7f9915916195ed146cf81a5ac74b5095751",
                 "shasum": ""
             },
             "require": {
@@ -218,7 +218,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.1-dev"
+                    "dev-master": "3.0-dev"
                 }
             },
             "autoload": {
@@ -245,7 +245,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2016-06-29 05:41:56"
+            "time": "2016-06-29 05:40:00"
         }
     ],
     "packages-dev": [
