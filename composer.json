@@ -2,7 +2,7 @@
   "name": "crusepartnership/php-raml-parser",
   "type": "library",
   "description": "A RAML parser built in php",
-  "homepage": "https://github.com/alecsammon/php-raml-parser",
+  "homepage": "https://github.com/raml-org/raml-php-parser",
   "license": "MIT",
 
   "authors": [
@@ -12,22 +12,22 @@
     }
   ],
 
-  "autoload": {
-    "psr-4": {
-      "Raml\\": "src/"
-    }
+  "require": {
+    "justinrainbow/json-schema": "~1.5",
+    "symfony/yaml": "~3.4.0",
+    "symfony/routing": "~2.5|~3.1.0|~3.2",
+    "oodle/inflect": "~0.2"
   },
-  
+
   "require-dev": {
     "satooshi/php-coveralls": "~0.6",
     "phpunit/phpunit": "4.*",
     "squizlabs/php_codesniffer": "@dev"
   },
 
-  "require": {
-    "justinrainbow/json-schema": "~1.5",
-    "symfony/yaml": "~3.0.0",
-    "symfony/routing": "~2.5|~3.1.0|~3.2",
-    "oodle/inflect": "~0.2"
+  "autoload": {
+    "psr-4": {
+      "Raml\\": "src/"
+    }
   }
 }
