@@ -24,10 +24,10 @@ class NoRouteFormatter implements RouteFormatterInterface
         $this->routes = [];
 
         foreach ($resources as $resource) {
-            $this->routes[$resource->getType() .' ' . $resource->getUri()] = [
+            $this->routes[$resource->getType() . ' ' . $resource->getUri()] = [
                 'path' => $resource->getUri(),
                 'type' => $resource->getType(),
-                'method' => $resource->getMethod()
+                'method' => $resource->getMethod(),
             ];
         }
 

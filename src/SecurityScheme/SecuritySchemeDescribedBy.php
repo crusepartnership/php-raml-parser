@@ -2,9 +2,10 @@
 
 namespace Raml\SecurityScheme;
 
-use \Raml\ArrayInstantiationInterface;
-use \Raml\NamedParameter;
-use \Raml\Response;
+use Raml\ArrayInstantiationInterface;
+use Raml\BodyInterface;
+use Raml\NamedParameter;
+use Raml\Response;
 
 /**
  * A description of a security scheme
@@ -13,16 +14,6 @@ use \Raml\Response;
  */
 class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
 {
-
-    /**
-     * The key of the security scheme
-     *
-     * @var string
-     */
-    private $key;
-
-    // --
-
     /**
      * A list of non default headers (optional)
      *
@@ -55,19 +46,6 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
      */
     private $bodyList = [];
 
-
-    // ---
-
-    /**
-     * Create a new security scheme description
-     *
-     * @param string $key
-     */
-    public function __construct($key)
-    {
-        $this->key = $key;
-    }
-
     /**
      * Create a new SecuritySchemeDescribedBy from an array of data
      *
@@ -87,11 +65,7 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
 
         if (isset($data['body'])) {
             foreach ($data['body'] as $key => $bodyData) {
-                if (in_array($key, \Raml\WebFormBody::$validMediaTypes)) {
-                    $body = \Raml\WebFormBody::createFromArray($key, $bodyData);
-                } else {
-                    $body = \Raml\Body::createFromArray($key, $bodyData);
-                }
+                $body = \in_array($key, \Raml\WebFormBody::$validMediaTypes, true) ? \Raml\WebFormBody::createFromArray($key, $bodyData) : \Raml\Body::createFromArray($key, $bodyData);
 
                 $describedBy->addBody($body);
             }
@@ -111,7 +85,7 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
             }
         }
 
-        if (isset($data['responses']) && is_array($data['responses'])) {
+        if (isset($data['responses']) && \is_array($data['responses'])) {
             foreach ($data['responses'] as $responseCode => $response) {
                 $describedBy->addResponse(
                     Response::createFromArray($responseCode, $response ?: [])
@@ -155,13 +129,11 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
     /**
      * Add a body
      *
-     * @param BodyInterface $body
      */
-    public function addBody(\Raml\BodyInterface $body)
+    public function addBody(BodyInterface $body)
     {
         $this->bodyList[$body->getMediaType()] = $body;
     }
-
 
     /**
      * Returns the headers
@@ -176,7 +148,6 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
     /**
      * Add a new header
      *
-     * @param NamedParameter $header
      */
     public function addHeader(NamedParameter $header)
     {
@@ -198,7 +169,6 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
     /**
      * Add a query parameter
      *
-     * @param NamedParameter $queryParameter
      */
     public function addQueryParameter(NamedParameter $queryParameter)
     {
@@ -220,7 +190,7 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
     /**
      * Get a response by the response code (200, 404,....)
      *
-     * @param integer $responseCode
+     * @param int $responseCode
      *
      * @return Response
      */
@@ -232,7 +202,6 @@ class SecuritySchemeDescribedBy implements ArrayInstantiationInterface
     /**
      * Add a response
      *
-     * @param Response $response
      */
     public function addResponse(Response $response)
     {

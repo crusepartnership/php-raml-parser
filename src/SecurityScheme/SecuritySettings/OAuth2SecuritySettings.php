@@ -6,6 +6,9 @@ use Raml\SecurityScheme\SecuritySettingsInterface;
 
 class OAuth2SecuritySettings implements SecuritySettingsInterface
 {
+    /**
+     * @var string
+     */
     const TYPE = 'OAuth 2.0';
 
     // --
@@ -45,7 +48,6 @@ class OAuth2SecuritySettings implements SecuritySettingsInterface
     /**
      * Flesh out the settings
      *
-     * @param array                     $data
      * @param SecuritySettingsInterface $sourceSettings
      *
      * @throws \Exception
@@ -54,11 +56,12 @@ class OAuth2SecuritySettings implements SecuritySettingsInterface
      */
     public static function createFromArray(array $data, SecuritySettingsInterface $sourceSettings = null)
     {
-        if ($sourceSettings && !$sourceSettings instanceof OAuth2SecuritySettings) {
-            throw new \Exception();
+        if ($sourceSettings && !$sourceSettings instanceof self) {
+            throw new \InvalidArgumentException('Provide an instance of OAuth2SecuritySettings for $sourceSettings');
         }
 
         $settings = $sourceSettings ? clone $sourceSettings : new static();
+        \assert($settings instanceof self);
 
         if (isset($data['authorizationUri'])) {
             $settings->setAuthorizationUri($data['authorizationUri']);

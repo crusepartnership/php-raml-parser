@@ -1,4 +1,5 @@
 <?php
+
 namespace Raml;
 
 /**
@@ -6,14 +7,14 @@ namespace Raml;
  *
  * @see http://raml.org/spec.html#responses
  */
-class Response implements ArrayInstantiationInterface
+class Response implements ArrayInstantiationInterface, MessageSchemaInterface
 {
     /**
      * The status code of the response
      *
      * @see http://raml.org/spec.html#responses
      *
-     * @var integer
+     * @var int
      */
     private $statusCode;
 
@@ -50,27 +51,26 @@ class Response implements ArrayInstantiationInterface
     /**
      * Create a new Response
      *
-     * @param integer $statusCode
+     * @param int $statusCode
      */
     public function __construct($statusCode)
     {
-        $this->statusCode = (int) $statusCode;
+        $this->statusCode = $statusCode;
         $this->bodyList = [];
+        $this->headers = [];
     }
 
     /**
      * Create a new response object from an array
      *
      * @param string $statusCode
-     * @param array  $data
-     *
      * @return Response
      */
     public static function createFromArray($statusCode, array $data = [])
     {
         $response = new static($statusCode);
 
-        if (isset($data['body']) && is_array($data['body'])) {
+        if (isset($data['body']) && \is_array($data['body'])) {
             foreach ($data['body'] as $key => $bodyData) {
                 $response->addBody(Body::createFromArray($key, $bodyData ?: []));
             }
@@ -94,7 +94,7 @@ class Response implements ArrayInstantiationInterface
     /**
      * Returns the status code
      *
-     * @return integer
+     * @return int
      */
     public function getStatusCode()
     {
@@ -107,20 +107,20 @@ class Response implements ArrayInstantiationInterface
      * Get the body by type
      *
      * @param string $type
-     *
-     * @throws \Exception
-     *
      * @return BodyInterface
+     *
+     * @throws \InvalidArgumentException
      */
     public function getBodyByType($type)
     {
         if (isset($this->bodyList[$type])) {
             return $this->bodyList[$type];
-        } elseif (isset($this->bodyList['*/*'])) {
+        }
+        if (isset($this->bodyList['*/*'])) {
             return $this->bodyList['*/*'];
         }
 
-        throw new \Exception('No body found for type "'.$type.'"');
+        throw new \InvalidArgumentException(\sprintf('No body found for type "%s"', $type));
     }
 
     /**
@@ -136,19 +136,18 @@ class Response implements ArrayInstantiationInterface
     /**
      * Returns all supported types in response
      *
-     * @return array
+     * @return string[]
      */
     public function getTypes()
     {
-        return array_keys($this->bodyList);
+        return \array_keys($this->bodyList);
     }
 
     /**
      * Add a new body
      *
-     * @param Body $body
      */
-    public function addBody(Body $body)
+    public function addBody(BodyInterface $body)
     {
         $this->bodyList[$body->getMediaType()] = $body;
     }
@@ -168,7 +167,6 @@ class Response implements ArrayInstantiationInterface
     /**
      * Add a new header
      *
-     * @param NamedParameter $header
      */
     public function addHeader(NamedParameter $header)
     {

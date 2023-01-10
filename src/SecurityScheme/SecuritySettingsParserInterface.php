@@ -1,4 +1,5 @@
 <?php
+
 namespace Raml\SecurityScheme;
 
 /**
@@ -9,7 +10,6 @@ interface SecuritySettingsParserInterface
     /**
      * Create a security settings object from an array of data
      *
-     * @param array $data
      *
      * @return object[]
      */

@@ -2,9 +2,9 @@
 
 namespace Raml\Schema\Definition;
 
-use Raml\Exception\InvalidXmlException;
-use Raml\Exception\InvalidSchemaException;
-use \Raml\Schema\SchemaDefinitionInterface;
+use DOMDocument;
+use Raml\Schema\SchemaDefinitionInterface;
+use Raml\Types\TypeValidationError;
 
 class XmlSchemaDefinition implements SchemaDefinitionInterface
 {
@@ -14,6 +14,8 @@ class XmlSchemaDefinition implements SchemaDefinitionInterface
      * @var string
      */
     private $xml;
+
+    private $errors = [];
 
     // --
 
@@ -27,45 +29,6 @@ class XmlSchemaDefinition implements SchemaDefinitionInterface
         $this->xml = $xml;
     }
 
-    // ---
-    // SchemaDefinitionInterface
-
-    /**
-     * Validate an XML string against the schema
-     *
-     * @param $string
-     *
-     * @throws \Exception
-     *
-     * @return boolean
-     */
-    public function validate($string)
-    {
-        $dom = new \DOMDocument;
-
-        $originalErrorLevel = libxml_use_internal_errors(true);
-
-        $dom->loadXML($string);
-        $errors = libxml_get_errors();
-        libxml_clear_errors();
-        if ($errors) {
-            throw new InvalidXmlException($errors);
-        }
-
-        // ---
-
-        $dom->schemaValidateSource($this->xml);
-        $errors = libxml_get_errors();
-        libxml_clear_errors();
-        if ($errors) {
-            throw new InvalidSchemaException($errors);
-        }
-        
-        libxml_use_internal_errors($originalErrorLevel);
-
-        return true;
-    }
-
     /**
      * Returns the XML schema as a string
      *
@@ -74,5 +37,53 @@ class XmlSchemaDefinition implements SchemaDefinitionInterface
     public function __toString()
     {
         return $this->xml;
+    }
+
+    // ---
+    // SchemaDefinitionInterface
+
+    /**
+     * Validate an XML string against the schema
+     *
+     *
+     * @throws \Exception
+     */
+    public function validate($value)
+    {
+        if (!$value instanceof DOMDocument) {
+            $this->errors[] = TypeValidationError::xmlValidationFailed('Expected value of type DOMDocument');
+
+            return;
+        }
+
+        $originalErrorLevel = \libxml_use_internal_errors(true);
+        $value->schemaValidateSource($this->xml);
+        $errors = \libxml_get_errors();
+        \libxml_clear_errors();
+        if ($errors) {
+            foreach ($errors as $error) {
+                $this->errors[] = TypeValidationError::xmlValidationFailed($error->message);
+            }
+
+            return;
+        }
+
+        \libxml_use_internal_errors($originalErrorLevel);
+    }
+
+    /**
+     * @return TypeValidationError[]
+     */
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValid()
+    {
+        return empty($this->errors);
     }
 }

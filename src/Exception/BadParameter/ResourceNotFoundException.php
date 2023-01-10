@@ -2,8 +2,8 @@
 
 namespace Raml\Exception\BadParameter;
 
-use Raml\Exception\RamlParserException;
 use Raml\Exception\BadParameterExceptionInterface;
+use Raml\Exception\RamlParserException;
 
 class ResourceNotFoundException extends RamlParserException implements BadParameterExceptionInterface
 {
@@ -13,7 +13,7 @@ class ResourceNotFoundException extends RamlParserException implements BadParame
     {
         $this->uri = $uri;
 
-        parent::__construct(sprintf('The URI %s does not exist.', $this->uri));
+        parent::__construct(\sprintf('The URI %s does not exist.', $this->uri));
     }
 
     public function getUri()

@@ -2,12 +2,11 @@
 
 namespace Raml\Schema\Parser;
 
-use Raml\Schema\SchemaParserAbstract;
 use Raml\Schema\Definition\XmlSchemaDefinition;
+use Raml\Schema\SchemaParserAbstract;
 
 class XmlSchemaParser extends SchemaParserAbstract
 {
-
     /**
      * List of known XML content types
      *
@@ -16,17 +15,15 @@ class XmlSchemaParser extends SchemaParserAbstract
     protected $compatibleContentTypes = [
         'application/xml',
         'text/xml',
-        'application/soap+xml'
+        'application/soap+xml',
     ];
-
-    // ---
 
     /**
      * Create a new XML Schema definition from a string
      *
-     * @param $schemaString
+     * @param string $schemaString
      *
-     * @return \Raml\Schema\Definition\XmlSchemaDefinition
+     * @return XmlSchemaDefinition
      */
     public function createSchemaDefinition($schemaString)
     {
