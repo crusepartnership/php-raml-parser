@@ -45,7 +45,7 @@ class JsonType extends Type
         $validator = new Validator();
         $jsonSchema = $this->json;
 
-        $validator->check($value, $jsonSchema);
+        $validator->validate($value, $jsonSchema);
 
         if (!$validator->isValid()) {
             foreach ($validator->getErrors() as $error) {
