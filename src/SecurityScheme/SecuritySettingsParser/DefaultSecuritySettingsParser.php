@@ -7,14 +7,12 @@ use Raml\SecurityScheme\SecuritySettingsParserInterface;
 
 class DefaultSecuritySettingsParser implements SecuritySettingsParserInterface
 {
-
     // ---
     // SecuritySettingsParserInterface
 
     /**
      * Create a new Default Security Settings Object from array data
      *
-     * @param array $data
      *
      * @return DefaultSecuritySettings
      */

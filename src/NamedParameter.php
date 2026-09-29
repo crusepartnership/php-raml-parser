@@ -1,58 +1,163 @@
 <?php
+
 namespace Raml;
 
-use \Raml\Exception\InvalidQueryParameterTypeException;
-use \Raml\Exception\ValidationException;
+use Raml\Exception\InvalidQueryParameterTypeException;
+use Raml\Exception\ValidationException;
 
 /**
- * Named Parameters
- *
  * @see http://raml.org/spec.html#named-parameters
  */
 class NamedParameter implements ArrayInstantiationInterface
 {
-    // ---
     // Type constants
 
-    const TYPE_STRING   = 'string';
-    const TYPE_NUMBER   = 'number';
-    const TYPE_INTEGER  = 'integer';
-    const TYPE_DATE     = 'date';
-    const TYPE_BOOLEAN  = 'boolean';
-    const TYPE_FILE     = 'file';
-    
-    // ---
+    /**
+     * @var string
+     */
+    const TYPE_ANY = 'any';
+
+    /**
+     * @var string
+     */
+    const TYPE_STRING = 'string';
+
+    /**
+     * @var string
+     */
+    const TYPE_NUMBER = 'number';
+
+    /**
+     * @var string
+     */
+    const TYPE_INTEGER = 'integer';
+
+    /**
+     * @var string
+     */
+    const TYPE_DATE = 'date';
+
+    /**
+     * @var string
+     */
+    const TYPE_BOOLEAN = 'boolean';
+
+    /**
+     * @var string
+     */
+    const TYPE_FILE = 'file';
+
+    /**
+     * @var string
+     */
+    const TYPE_DATE_ONLY = 'date-only';
+
+    /**
+     * @var string
+     */
+    const TYPE_TIME_ONLY = 'time-only';
+
+    /**
+     * @var string
+     */
+    const TYPE_DATETIME_ONLY = 'datetime-only';
+
+    /**
+     * @var string
+     */
+    const TYPE_DATETIME = 'datetime';
+
+    /**
+     * @var string
+     */
+    const TYPE_ARRAY = 'array';
+
     // Validation exception codes
-    
-    const VAL_NOTBOOLEAN   = 1;
-    const VAL_NOTDATE      = 2;
-    const VAL_NOTSTRING    = 3;
-    const VAL_NOTINT       = 4;
-    const VAL_NOTNUMBER    = 5;
-    const VAL_NOTFILE      = 6; // Unused
-    const VAL_ISREQUIRED   = 7;
-    const VAL_TOOSHORT     = 8;
-    const VAL_TOOLONG      = 9;
-    const VAL_NUMLESSTHAN  = 10;
-    const VAL_GREATERTHAN  = 11;
-    const VAL_PATTERNFAIL  = 12;
+
+    /**
+     * @var int
+     */
+    const VAL_NOTBOOLEAN = 1;
+
+    /**
+     * @var int
+     */
+    const VAL_NOTDATE = 2;
+
+    /**
+     * @var int
+     */
+    const VAL_NOTSTRING = 3;
+
+    /**
+     * @var int
+     */
+    const VAL_NOTINT = 4;
+
+    /**
+     * @var int
+     */
+    const VAL_NOTNUMBER = 5;
+
+    /**
+     * @var int
+     */
+    const VAL_NOTFILE = 6; // Unused
+
+    /**
+     * @var int
+     */
+    const VAL_ISREQUIRED = 7;
+
+    /**
+     * @var int
+     */
+    const VAL_TOOSHORT = 8;
+
+    /**
+     * @var int
+     */
+    const VAL_TOOLONG = 9;
+
+    /**
+     * @var int
+     */
+    const VAL_NUMLESSTHAN = 10;
+
+    /**
+     * @var int
+     */
+    const VAL_GREATERTHAN = 11;
+
+    /**
+     * @var int
+     */
+    const VAL_PATTERNFAIL = 12;
+
+    /**
+     * @var int
+     */
     const VAL_NOTENUMVALUE = 13;
 
     /**
      * Valid types
      *
-     * @var array
+     * @var string[]
      */
     protected $validTypes = [
+        self::TYPE_ANY,
         self::TYPE_STRING,
         self::TYPE_NUMBER,
         self::TYPE_INTEGER,
         self::TYPE_DATE,
         self::TYPE_BOOLEAN,
-        self::TYPE_FILE
+        self::TYPE_FILE,
+        self::TYPE_DATETIME_ONLY,
+        self::TYPE_DATE_ONLY,
+        self::TYPE_TIME_ONLY,
+        self::TYPE_DATETIME,
+        self::TYPE_ARRAY,
     ];
-
-    // ---
 
     /**
      * The key of the named parameter (required)
@@ -88,7 +193,6 @@ class NamedParameter implements ArrayInstantiationInterface
      */
     private $type = self::TYPE_STRING;
 
-
     /**
      * List of valid values for the parameter (optional)
      *
@@ -112,7 +216,7 @@ class NamedParameter implements ArrayInstantiationInterface
      *
      * @see http://raml.org/spec.html#minlength
      *
-     * @var integer
+     * @var int
      */
     private $minLength;
 
@@ -121,7 +225,7 @@ class NamedParameter implements ArrayInstantiationInterface
      *
      * @see http://raml.org/spec.html#maxlength
      *
-     * @var integer
+     * @var int
      */
     private $maxLength;
 
@@ -130,7 +234,7 @@ class NamedParameter implements ArrayInstantiationInterface
      *
      * @see http://raml.org/spec.html#minimum
      *
-     * @var integer
+     * @var int
      */
     private $minimum;
 
@@ -139,7 +243,7 @@ class NamedParameter implements ArrayInstantiationInterface
      *
      * @see http://raml.org/spec.html#maximum
      *
-     * @var integer
+     * @var int
      */
     private $maximum;
 
@@ -152,13 +256,12 @@ class NamedParameter implements ArrayInstantiationInterface
      */
     private $examples;
 
-
     /**
      * Whether the parameter can be used multiple times (default: false)
      *
      * @see http://raml.org/spec.html#repeat
      *
-     * @var boolean
+     * @var bool
      */
     private $repeat = false;
 
@@ -167,7 +270,7 @@ class NamedParameter implements ArrayInstantiationInterface
      *
      * @see http://raml.org/spec.html#required
      *
-     * @var boolean
+     * @var bool
      */
     protected $required = false;
 
@@ -175,17 +278,22 @@ class NamedParameter implements ArrayInstantiationInterface
      * A default value used by the server if not provided
      *
      * @see http://raml.org/spec.html#default
-     *
-     * @var mixed
      */
     private $default;
+
+    /**
+     * DateTime format (for datetime type only)
+     *
+     * @var string
+     */
+    private $format;
 
     // ---
 
     /**
      * Create a new Query Parameter
      *
-     * @param string  $key
+     * @param string $key
      */
     public function __construct($key)
     {
@@ -207,12 +315,12 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Create a Query Parameter from an Array
      *
-     * @param $key
-     * @param $data
+     * @param string $key
+     * @param array $data
      * [
      *  displayName:        ?string
      *  description:        ?string
-     *  type:               ?["string","number","integer","date","boolean","file"]
+     *  type:               ?["string","number","integer","date","boolean","file", ...]
      *  enum:               ?array
      *  pattern:            ?string
      *  validationPattern:  ?string
@@ -225,11 +333,12 @@ class NamedParameter implements ArrayInstantiationInterface
      *  repeat:             ?boolean
      *  required:           ?boolean
      *  default:            ?string
+     *  format:             ?string
      * ]
      *
      * @throws \Exception
      *
-     * @return NamedParameter
+     * @return self
      */
     public static function createFromArray($key, array $data = [])
     {
@@ -296,10 +405,14 @@ class NamedParameter implements ArrayInstantiationInterface
 
         if (isset($data['default'])) {
             if ($namedParameter->getType() === self::TYPE_DATE) {
-                $namedParameter->setDefault(\DateTime::createFromFormat('D, d M Y H:i:s T', $data['default']));
+                $namedParameter->setDefault(\DateTimeImmutable::createFromFormat('D, d M Y H:i:s T', $data['default']));
             } else {
                 $namedParameter->setDefault($data['default']);
             }
+        }
+
+        if (isset($data['format'])) {
+            $namedParameter->setFormat($data['format']);
         }
 
         return $namedParameter;
@@ -370,7 +483,7 @@ class NamedParameter implements ArrayInstantiationInterface
      */
     public function setType($type = 'string')
     {
-        if (!in_array($type, $this->validTypes)) {
+        if (!\in_array($type, $this->validTypes, true)) {
             throw new InvalidQueryParameterTypeException($type, $this->validTypes);
         }
 
@@ -392,7 +505,6 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Set the allowed values
      *
-     * @param array $enum
      */
     public function setEnum(array $enum)
     {
@@ -426,7 +538,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Get the minLength
      *
-     * @return integer
+     * @return int
      */
     public function getMinLength()
     {
@@ -436,7 +548,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Set minLength
      *
-     * @param integer $minLength
+     * @param int $minLength
      *
      * @throws \Exception
      */
@@ -454,7 +566,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Get the maxLength
      *
-     * @return integer
+     * @return int
      */
     public function getMaxLength()
     {
@@ -464,7 +576,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Set maxLength
      *
-     * @param integer $minLength
+     * @param int $maxLength
      *
      * @throws \Exception
      */
@@ -482,7 +594,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Get the minimum
      *
-     * @return integer
+     * @return int
      */
     public function getMinimum()
     {
@@ -492,14 +604,14 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Set minimum
      *
-     * @param integer $minimum
+     * @param int $minimum
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function setMinimum($minimum)
     {
-        if (!in_array($this->type, [self::TYPE_INTEGER, self::TYPE_NUMBER])) {
-            throw new \Exception('minimum can only be set on type "integer" or "number');
+        if (!\in_array($this->type, [self::TYPE_INTEGER, self::TYPE_NUMBER], true)) {
+            throw new \InvalidArgumentException('minimum can only be set on type "integer" or "number');
         }
 
         $this->minimum = (int) $minimum;
@@ -510,7 +622,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Get the maximum
      *
-     * @return integer
+     * @return int
      */
     public function getMaximum()
     {
@@ -520,14 +632,14 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Set maximum
      *
-     * @param integer $maximum
+     * @param int $maximum
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function setMaximum($maximum)
     {
-        if (!in_array($this->type, [self::TYPE_INTEGER, self::TYPE_NUMBER])) {
-            throw new \Exception('maximum can only be set on type "integer" or "number');
+        if (!\in_array($this->type, [self::TYPE_INTEGER, self::TYPE_NUMBER], true)) {
+            throw new \InvalidArgumentException('maximum can only be set on type "integer" or "number');
         }
 
         $this->maximum = (int) $maximum;
@@ -538,11 +650,13 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Get the example
      *
+     * @param int $position
+     *
      * @return string
      */
-    public function getExample()
+    public function getExample($position = 0)
     {
-        return $this->examples[0];
+        return $this->examples[$position];
     }
 
     /**
@@ -570,9 +684,9 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Can the parameter be repeated
      *
-     * @return boolean
+     * @return bool
      */
-    public function canBeRepeated()
+    public function canRepeat()
     {
         return $this->repeat;
     }
@@ -580,11 +694,11 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Set if the parameter can be repeated
      *
-     * @param boolean $repeated
+     * @param bool $repeat
      */
-    public function setRepeat($repeated)
+    public function setRepeat($repeat)
     {
-        $this->repeated = (bool) $repeated;
+        $this->repeat = (bool) $repeat;
     }
 
     // --
@@ -592,7 +706,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Is the parameter required
      *
-     * @return boolean
+     * @return bool
      */
     public function isRequired()
     {
@@ -602,7 +716,7 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Set if the parameter is required
      *
-     * @param boolean $required
+     * @param bool $required
      */
     public function setRequired($required)
     {
@@ -614,7 +728,6 @@ class NamedParameter implements ArrayInstantiationInterface
     /**
      * Return the default
      *
-     * @return mixed
      */
     public function getDefault()
     {
@@ -622,148 +735,164 @@ class NamedParameter implements ArrayInstantiationInterface
     }
 
     /**
+     * @return string
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    /**
+     * @param string $format
+     */
+    public function setFormat($format)
+    {
+        $this->format = $format;
+    }
+
+    /**
      * Set the default
      *
-     * @param mixed $default
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function setDefault($default)
     {
         switch ($this->type) {
             case self::TYPE_STRING:
-                if (!is_string($default)) {
-                    throw new \Exception('Default parameter is not a string');
+                if (!\is_string($default)) {
+                    throw new \InvalidArgumentException('Default parameter is not a string');
                 }
+
                 break;
             case self::TYPE_NUMBER:
-                if (!is_numeric($default)) {
-                    throw new \Exception('Default parameter is not a number');
+                if (!\is_numeric($default)) {
+                    throw new \InvalidArgumentException('Default parameter is not a number');
                 }
+
                 break;
             case self::TYPE_INTEGER:
-                if (!is_integer($default)) {
-                    throw new \Exception('Default parameter is not an integer');
+                if (!\is_numeric($default) || (int) $default != $default) {
+                    throw new \InvalidArgumentException('Default parameter is not an integer');
                 }
+
                 break;
             case self::TYPE_DATE:
-                if (!$default instanceof \DateTime) {
-                    throw new \Exception('Default parameter is not a dateTime object');
+                if (!$default instanceof \DateTimeImmutable) {
+                    throw new \InvalidArgumentException('Default parameter is not a dateTime object');
                 }
+
                 break;
             case self::TYPE_BOOLEAN:
-                if (!is_bool($default)) {
-                    throw new \Exception('Default parameter is not a boolean');
+                if (!\is_bool($default)) {
+                    throw new \InvalidArgumentException('Default parameter is not a boolean');
                 }
+
                 break;
             case self::TYPE_FILE:
-                throw new \Exception('A default value cannot be set for a file');
+                throw new \InvalidArgumentException('A default value cannot be set for a file');
+
                 break;
         }
 
         $this->default = $default;
     }
-    
+
     /**
-     * Validate a paramater via RAML specifications
+     * Validate a parameter via RAML specifications
      *
-     * @param mixed $param The value of the paramater to validate
-     * @throws \Exception The code corresponds to the error that occured.
+     * @param mixed $param The value of the parameter to validate
+     * @throws ValidationException The code corresponds to the error that occurred.
      */
     public function validate($param)
     {
-        /**
+        /*
          * If we don't have a value to validate, check if it's required.
-         *
          * @link http://raml.org/spec.html#required
          */
-        if (in_array($param, array(null, ''), true)) {
+        if (\in_array($param, [null, ''], true)) {
             if ($this->isRequired()) {
-                throw new ValidationException($this->getKey().' is required', static::VAL_ISREQUIRED);
+                throw new ValidationException($this->getKey() . ' is required', static::VAL_ISREQUIRED);
             }
-                
+
             return;
-                
         }
-        
+
         switch ($this->getType()) {
             case static::TYPE_BOOLEAN:
-                
+
                 // Must be boolean
-                if (!is_bool($param)) {
-                    throw new ValidationException($this->getKey().' is not boolean', static::VAL_NOTBOOLEAN);
+                if (!\is_bool($param)) {
+                    throw new ValidationException($this->getKey() . ' is not boolean', static::VAL_NOTBOOLEAN);
                 }
-                
+
                 break;
-                
             case static::TYPE_DATE:
 
                 // Must be a valid date
-                if (\DateTime::createFromFormat('D, d M Y H:i:s T', $param) === false) {
-                    throw new ValidationException($this->getKey().' is not a valid date', static::VAL_NOTDATE);
+                if (!\DateTimeImmutable::createFromFormat('D, d M Y H:i:s T', $param)) {
+                    throw new ValidationException($this->getKey() . ' is not a valid date', static::VAL_NOTDATE);
                 }
 
-                // DATES are also strings
+                // no break
+
             case static::TYPE_STRING:
-    
+
                 // Must be a string
-                if (!is_string($param)) {
-                    throw new ValidationException($this->getKey().' is not a string', static::VAL_NOTSTRING);
+                if (!\is_string($param)) {
+                    throw new ValidationException($this->getKey() . ' is not a string', static::VAL_NOTSTRING);
                 }
-    
+
                 /**
                  * Check the length of a string.
                  *
                  * @link http://raml.org/spec.html#minlength
                  */
                 $minLength = $this->getMinLength();
-                if (!empty($minLength) && strlen($param) < $minLength) {
+                if (!empty($minLength) && \mb_strlen($param) < $minLength) {
                     throw new ValidationException(
-                        $this->getKey().' must be at least '.$minLength.' characters long',
+                        $this->getKey() . ' must be at least ' . $minLength . ' characters long',
                         static::VAL_TOOSHORT
                     );
                 }
-                
+
                 /**
                  * Check the length of a string.
                  *
                  * @link http://raml.org/spec.html#maxlength
                  */
                 $maxLength = $this->getMaxLength();
-                if (!empty($maxLength) && strlen($param) > $maxLength) {
+                if (!empty($maxLength) && \mb_strlen($param) > $maxLength) {
                     throw new ValidationException(
-                        $this->getKey().' must be no more than '.$maxLength.' characters long',
+                        $this->getKey() . ' must be no more than ' . $maxLength . ' characters long',
                         static::VAL_TOOLONG
                     );
                 }
-    
+
                 break;
-                
-
-
             case static::TYPE_INTEGER:
-                
-                /**
+
+                /*
                  * Integers must be of type integer.
                  *
                  * @link http://raml.org/spec.html#type
                  */
-                if (!is_int($param)) {
-                    throw new ValidationException($this->getKey().' is not an integer', static::VAL_NOTINT);
+                if (!\is_int($param)) {
+                    throw new ValidationException($this->getKey() . ' is not an integer', static::VAL_NOTINT);
                 }
-                // No break
-                
+                // no break
+
             case static::TYPE_NUMBER:
-    
-                /**
+
+                /*
                  * Number types must be numeric. ;)
                  *
                  * @link http://raml.org/spec.html#type
                  */
-                if (!is_numeric($param)) {
-                    throw new ValidationException($this->getKey().' is not a number', static::VAL_NOTNUMBER);
+                if (!\is_numeric($param)) {
+                    throw new ValidationException($this->getKey() . ' is not a number', static::VAL_NOTNUMBER);
                 }
-    
+
                 /**
                  * Check the value constraints if specified.
                  *
@@ -772,11 +901,11 @@ class NamedParameter implements ArrayInstantiationInterface
                 $min = $this->getMinimum();
                 if (!empty($min) && $param < $min) {
                     throw new ValidationException(
-                        $this->getKey().' must be greater than or equal to '.$min,
+                        $this->getKey() . ' must be greater than or equal to ' . $min,
                         static::VAL_NUMLESSTHAN
                     );
                 }
-                
+
                 /**
                  * Check the value constraints if specified.
                  *
@@ -785,21 +914,35 @@ class NamedParameter implements ArrayInstantiationInterface
                 $max = $this->getMaximum();
                 if (!empty($max) && $param > $max) {
                     throw new ValidationException(
-                        $this->getKey().' must be less than or equal to '.$max,
+                        $this->getKey() . ' must be less than or equal to ' . $max,
                         static::VAL_GREATERTHAN
                     );
                 }
-    
+
                 break;
-                
             case static::TYPE_FILE:
-                
                 // File type cannot be reliably validated based on its type alone.
-                
+
                 break;
-                
+            case static::TYPE_TIME_ONLY:
+            case static::TYPE_DATE_ONLY:
+            case static::TYPE_DATETIME_ONLY:
+            case static::TYPE_DATETIME:
+                $typeObject = ApiDefinition::determineType(
+                    $this->key,
+                    [
+                        'type' => $this->getType(),
+                        'format' => $this->getFormat(),
+                    ]
+                );
+                $typeObject->validate($param);
+                if (!$typeObject->isValid()) {
+                    throw new ValidationException($typeObject->getErrors()[0]);
+                }
+
+                break;
         }
-    
+
         /**
          * Validate against the RAML specified pattern if it exists.
          *
@@ -807,15 +950,15 @@ class NamedParameter implements ArrayInstantiationInterface
          */
         $validationPattern = $this->getValidationPattern();
         if (!empty($validationPattern) &&
-            preg_match('|'.$validationPattern.'|', $param) !== 1
+            \preg_match('|' . $validationPattern . '|', $param) !== 1
         ) {
             throw new ValidationException(
-                $this->getKey().' does not match the specified pattern',
+                $this->getKey() . ' does not match the specified pattern',
                 static::VAL_PATTERNFAIL
             );
         }
-    
-        /**
+
+        /*
          * If we have an enum (array), then it must be a specified value.
          *
          * NOTE: The RAML spec states that "enum" only applies to strings. However, it
@@ -824,11 +967,9 @@ class NamedParameter implements ArrayInstantiationInterface
          *
          * @link http://raml.org/spec.html#enum
          */
-        if (is_array($enum = $this->getEnum()) &&
-            !in_array($param, $enum)
-        ) {
+        if (\is_array($enum = $this->getEnum()) && !\in_array($param, $enum, true)) {
             throw new ValidationException(
-                $this->getKey().' must be one of the following: '.implode(', ', $enum),
+                $this->getKey() . ' must be one of the following: ' . \implode(', ', $enum),
                 static::VAL_NOTENUMVALUE
             );
         }
@@ -843,39 +984,42 @@ class NamedParameter implements ArrayInstantiationInterface
     {
         if ($this->validationPattern) {
             $pattern = $this->validationPattern;
+        } elseif ($enum = $this->getEnum()) {
+            $pattern = '^(' . \implode('|', \array_map('preg_quote', $enum)) . ')$';
         } else {
             switch ($this->getType()) {
                 case self::TYPE_NUMBER:
                     // @see http://www.regular-expressions.info/floatingpoint.html
                     $pattern = '[-+]?[0-9]*\.?[0-9]+';
+
                     break;
                 case self::TYPE_INTEGER:
                     $pattern = '[-+]?[0-9]+';
+
                     break;
                 case self::TYPE_DATE:
-                    // @see https://snipt.net/DamienGarrido/
-                    //          http-date-regular-expression-validation-rfc-1123rfc-850asctime-f64e6aa3/
-                    $pattern = '^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), (?:[0-2][0-9]|3[01]) '.
-                        '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} '.
-                        '(?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] '.
-                        'GMT|(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), '.
-                        '(?:[0-2][0-9]|3[01])-(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2} '.
-                        '(?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] GMT|(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) '.
-                        '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (?:[ 1-2][0-9]|3[01]) '.
+                    // @see https://snipt.net/DamienGarrido/http-date-regular-expression-validation-rfc-1123rfc-850asctime-f64e6aa3/
+                    $pattern = '^(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), (?:[0-2][0-9]|3[01]) ' .
+                        '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} ' .
+                        '(?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] ' .
+                        'GMT|(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ' .
+                        '(?:[0-2][0-9]|3[01])-(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2} ' .
+                        '(?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] GMT|(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) ' .
+                        '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (?:[ 1-2][0-9]|3[01]) ' .
                         '(?:[01][0-9]|2[0-3]):[012345][0-9]:[012345][0-9] \d{4})$';
+
                     break;
                 case self::TYPE_BOOLEAN:
                     $pattern = '(true|false)';
+
                     break;
                 case self::TYPE_FILE:
                     $pattern = '([^/]+)';
+
                     break;
                 case self::TYPE_STRING:
-                    if ($this->getMinLength() || $this->getMaxLength()) {
-                        $pattern = '((?!\/).){' . $this->getMinLength() . ',' . $this->getMaxLength() . '}';
-                    } else {
-                        $pattern = '([^/]+)';
-                    }
+                    $pattern = $this->getMinLength() || $this->getMaxLength() ? '((?!\/).){' . $this->getMinLength() . ',' . $this->getMaxLength() . '}' : '([^/]+)';
+
                     break;
                 default:
                     $pattern = '([^/]+)';

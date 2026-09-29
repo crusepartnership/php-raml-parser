@@ -1,4 +1,5 @@
 <?php
+
 namespace Raml;
 
 /**
@@ -8,7 +9,6 @@ namespace Raml;
  */
 class BaseUriParameter extends NamedParameter
 {
-
     /**
      * Valid types
      *
@@ -17,7 +17,7 @@ class BaseUriParameter extends NamedParameter
     protected $validTypes = [
         self::TYPE_STRING,
         self::TYPE_NUMBER,
-        self::TYPE_INTEGER
+        self::TYPE_INTEGER,
     ];
 
     // ---
@@ -27,7 +27,7 @@ class BaseUriParameter extends NamedParameter
      *
      * @see http://raml.org/spec.html#required
      *
-     * @var boolean
+     * @var bool
      */
     protected $required = true;
 }

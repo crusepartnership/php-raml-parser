@@ -6,9 +6,10 @@ use Raml\SecurityScheme\SecuritySettingsInterface;
 
 class OAuth1SecuritySettings implements SecuritySettingsInterface
 {
+    /**
+     * @var string
+     */
     const TYPE = 'OAuth 1.0';
-
-    // --
 
     /**
      * The URI of the Temporary Credential Request endpoint as defined in RFC5849 Section 2.1
@@ -31,13 +32,9 @@ class OAuth1SecuritySettings implements SecuritySettingsInterface
      */
     private $requestTokenUri;
 
-    // ---
-    // SecuritySettingsInterface
-
     /**
      * Flesh out the settings
      *
-     * @param array                     $data
      * @param SecuritySettingsInterface $sourceSettings
      *
      * @throws \Exception
@@ -46,11 +43,12 @@ class OAuth1SecuritySettings implements SecuritySettingsInterface
      */
     public static function createFromArray(array $data, SecuritySettingsInterface $sourceSettings = null)
     {
-        if ($sourceSettings && !$sourceSettings instanceof OAuth1SecuritySettings) {
-            throw new \Exception();
+        if ($sourceSettings && !$sourceSettings instanceof self) {
+            throw new \InvalidArgumentException('Provide an instance of OAuth1SecuritySettings for $sourceSettings');
         }
 
         $settings = $sourceSettings ? clone $sourceSettings : new static();
+        \assert($settings instanceof self);
 
         if (isset($data['tokenCredentialsUri'])) {
             $settings->setTokenCredentialsUri($data['tokenCredentialsUri']);
@@ -64,11 +62,8 @@ class OAuth1SecuritySettings implements SecuritySettingsInterface
             $settings->setAuthorizationUri($data['authorizationUri']);
         }
 
-
         return $settings;
     }
-
-    // ---
 
     /**
      * Get the Token Credentials URI
@@ -90,8 +85,6 @@ class OAuth1SecuritySettings implements SecuritySettingsInterface
         $this->tokenCredentialsUri = $tokenCredentialsUri;
     }
 
-    // --
-
     /**
      * Get the Request Token URI
      *
@@ -111,8 +104,6 @@ class OAuth1SecuritySettings implements SecuritySettingsInterface
     {
         $this->requestTokenUri = $requestTokenUri;
     }
-
-    // --
 
     /**
      * Get the Authorization URI
